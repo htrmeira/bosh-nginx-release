@@ -1,0 +1,7 @@
+---
+name: nginx
+templates:
+  ctl.sh: bin/ctl
+
+packages:
+- nginx

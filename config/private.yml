@@ -1,0 +1,5 @@
+---
+blobstore_secrete: 'does-not-matter'
+blobstore:
+  local:
+    blobstore_path: /home/ubuntu/workspace/tgzs
