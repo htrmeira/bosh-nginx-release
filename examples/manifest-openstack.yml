@@ -17,6 +17,8 @@ networks:
   - cloud_properties:
       net_id: 2adc8497-bdf9-4be7-9d43-399d22555640
       security_groups:
+      - default
+  type: dynamic
 
 resource_pools:
 - name: default
