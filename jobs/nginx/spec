@@ -2,6 +2,23 @@
 name: nginx
 templates:
   ctl.sh: bin/ctl
+  nginx.conf.erb: conf/nginx.conf
+  ssl_key.erb: conf/ssl_key.pem
+  ssl_cert.erb: conf/ssl_cert.crt
+  users_file.erb: conf/htpasswd
 
 packages:
 - nginx
+
+properties:
+  nginx_conf:
+    description: "Add the content of nginx.conf configuration file"
+  ssl_key:
+    default: ''
+    description: 'SSL key for https access, should be in PEM format'
+  ssl_cert:
+    default: ''
+    description: 'SSL certificates for the website'
+  users_file:
+    default: ''
+    description: 'htpasswd like user:password content. One user per line'
