@@ -9,6 +9,7 @@ Steps:
 - First add the blobs to the blobstore with: bosh add blob <tgz_path> nginx
 
 Then,
+Setup the deployment manifest: bosh deployment examples/manifest-openstack.yml
 
 bosh create release
 
