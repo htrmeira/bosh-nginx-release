@@ -33,7 +33,6 @@ update:
   canary_watch_time: 60000
   update_watch_time: 60000
   max_in_flight: 2
-
 jobs:
 - name: nginx
   templates:
@@ -44,4 +43,117 @@ jobs:
   - name: default
     static_ips:
     - 10.244.0.2
-  properties: {}
+  properties:
+    nginx_conf: |
+      worker_processes  1;
+      error_log /var/vcap/sys/log/nginx/error.log   info;
+
+      events {
+            worker_connections  1024;
+      }
+
+      http {
+            include       /var/vcap/jobs/nginx/packages/nginx/conf/mime.types;
+            default_type  application/octet-stream;
+            sendfile        on;
+            keepalive_timeout  65;
+
+            server {
+                listen       80;
+                server_name  localhost;
+
+                location / {
+                    root   html;
+                    index  index.html index.htm;
+                }
+
+                error_page   500 502 503 504  /50x.html;
+                location = /50x.html {
+                    root   html;
+                }
+
+            }
+
+            server {
+                listen       443 ssl;
+                server_name  localhost;
+
+                ssl_ciphers 'ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-DSS-AES128-GCM-SHA256:kEDH+AESGCM:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA:ECDHE-ECDSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA:DHE-DSS-AES128-SHA256:DHE-RSA-AES256-SHA256:DHE-DSS-AES256-SHA:DHE-RSA-AES256-SHA:AES128-GCM-SHA256:AES256-GCM-SHA384:AES128-SHA256:AES256-SHA256:AES128-SHA:AES256-SHA:AES:CAMELLIA:DES-CBC3-SHA:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!aECDH:!EDH-DSS-DES-CBC3-SHA:!EDH-RSA-DES-CBC3-SHA:!KRB5-DES-CBC3-SHA';
+                ssl_prefer_server_ciphers on;
+                ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
+
+                ssl_certificate_key     /var/vcap/jobs/nginx/conf/ssl_key.pem;
+                ssl_certificate         /var/vcap/jobs/nginx/conf/ssl_cert.crt;
+
+                auth_basic "Restricted";
+                auth_basic_user_file /var/vcap/jobs/nginx/conf/htpasswd;
+
+                access_log /var/vcap/sys/log/nginx/nginx-https-access.log;
+                error_log /var/vcap/sys/log/nginx/nginx-https-access.log;
+
+                location / {
+                    root   html;
+                    index  index.html index.htm;
+                }
+                error_page   500 502 503 504  /50x.html;
+                location = /50x.html {
+                    root   html;
+                }
+            }
+      }
+   #  admin:admin
+    users_file: |
+      admin:$apr1$7slUwyza$MhQ1tv3QTjNu2Y/DoM6ln0
+    ssl_key: |
+      -----BEGIN RSA PRIVATE KEY-----
+      MIIEogIBAAKCAQEA2hHPXFOhHPZKc7IPsVGEnLjYqsKuWZeRoxPxgyKyrg7AUQkj
+      choRYqqlYY2EB/j12YUGFsfPE32BY4L3M/Q3QYjC0BcPdRsFlSSmppMqc6APysqX
+      5Gqu0HRCZG05qqeX0HcObMX98yQLpHHfMIb83sOp38fOiuQXkTOIcvismyyNkcj2
+      hABstKOKuvMkJJzYYOgzT8E8PkGrvr7KvmlakuAESg+ojJ6gn55XrrZppNsyXhXW
+      m0klv783ZMBMh9qzpTCz4FLk5y+lzzz48PDjk5g2iaxDSdjtpMOztUhwUFxBTTQw
+      gkxMcRvx3uWWXv5EtIk93Y9DrGeV+GwvjZRzaQIDAQABAoIBAEh6XucazJOpsDkf
+      12Nh6qeEME8hAX25iKgg+sZRA/4h3P2SAfvsehbHDMyNknJr5ppzQgDUTBj4P8bp
+      Qmw8IRlg8Q7kezi60HIvikwW4acobddC2pUKeCvEWES0oNP9e9HHoD262Jq1QkFX
+      r4ybcPRBJ/a+nAFBqiuSayl7STMRUH/uOnIgSQBZ0+iSjeJMfLJrYDAIyor+HEbZ
+      Whk1ZAOvEGPkfuPkV7XqO/Jgb19dr7mbed9QyWYrSDmQbXEutINrIiWeL76IG1x1
+      CjaXf0omdrjMGT+DiSbqgN1ldvNnZclsvgMH5qEECz3SF+wwdNW1anzbYfcHuPWC
+      LA80zQECgYEA+LiAoYq2zW/LqXy1V3+Okute7RG+muK0O5NCpt5pyj6ZrtxFeQR+
+      Zy1+8RHOQvm0PGZ8W9nafdSyrobfIvzerRpE5p2HLvo4ajNHylBhSXvKrUpVyzDZ
+      SJxHeDQ5wichN4AdABiyQEnZpxxZbH1wgnEyLa+Oqi4sXMrtTL+LNxkCgYEA4HOo
+      uWK/s4X3uhn9gY7Enc5jAAOoYqWoem44yQrm8GJXifnrh+6Sj383SMDpupeJOZ/u
+      z6YQXcsq1Cs6nOnH8Mxpd9UjUt1KC2R6zcnLEpZKJx65za+vIUdX6zXDz41oV9qN
+      l/smVUrKpTARcZHpg0obVUJ0KszWgHS0V8a3ONECgYBtoS2ZhsHypX9Yso5gBep7
+      GeIajsK8FIcq50rusIRiz9r/tzmsEO4CXoxgh9+pp9To9qeD+O+UnScxRGOgUWN5
+      W2XZXMAUVdh9/yJ6q5lmQXlhjq1oRZzQo4nhEuwOhx7eDss5mqkfKy4Tuaw05Mmt
+      xWU/u+0fWADX2d5lANzFKQKBgAxWDwXxaXvidxUhbI98W04ZE9PiX5TcagAgorpa
+      AQthPFJ3C/zyndeJNG6pO69nuMEUCzoadHfTPM1get448yZG9d0CN+jMBM/Pe/hn
+      iOPCoty3kZq+dy+rDif9Un/L09pQRsv9n8O8Upr1o1/MlzsCDbKH7n6Tt45j262f
+      XF6hAoGALxUC5i8O8m+MArNhlUZvhKepRpAJKKrZMuaacOQ+r2gOv/TnvNyraiyn
+      tRzWG3pX2KDgaoniKTGs416HorYrCAdGme/r9yJBs6aKm5fh7WF3i7Jy7XTU6DGp
+      zmLbvYpA0LPoafK4a3HlEzfFUS9WSWyg2nVmsStlyI6Cho0qQOs=
+      -----END RSA PRIVATE KEY-----
+    ssl_cert: |
+      -----BEGIN CERTIFICATE-----
+      MIID9TCCAt2gAwIBAgIJAMQXDFIcOGakMA0GCSqGSIb3DQEBCwUAMIGQMQswCQYD
+      VQQGEwJERTERMA8GA1UECAwIU2FhcmxhbmQxFzAVBgNVBAcMDlNhYXJicsODwrxj
+      a2VuMRAwDgYDVQQKDAdBdmFydGVxMQswCQYDVQQLDAJJVDETMBEGA1UEAwwKYXZh
+      cnRlcS5kZTEhMB8GCSqGSIb3DQEJARYSaGRlbWVsb0BhdmFydGVxLmRlMB4XDTE3
+      MDUwMzEzMzQyOVoXDTIwMDUwMjEzMzQyOVowgZAxCzAJBgNVBAYTAkRFMREwDwYD
+      VQQIDAhTYWFybGFuZDEXMBUGA1UEBwwOU2FhcmJyw4PCvGNrZW4xEDAOBgNVBAoM
+      B0F2YXJ0ZXExCzAJBgNVBAsMAklUMRMwEQYDVQQDDAphdmFydGVxLmRlMSEwHwYJ
+      KoZIhvcNAQkBFhJoZGVtZWxvQGF2YXJ0ZXEuZGUwggEiMA0GCSqGSIb3DQEBAQUA
+      A4IBDwAwggEKAoIBAQDaEc9cU6Ec9kpzsg+xUYScuNiqwq5Zl5GjE/GDIrKuDsBR
+      CSNyGhFiqqVhjYQH+PXZhQYWx88TfYFjgvcz9DdBiMLQFw91GwWVJKamkypzoA/K
+      ypfkaq7QdEJkbTmqp5fQdw5sxf3zJAukcd8whvzew6nfx86K5BeRM4hy+KybLI2R
+      yPaEAGy0o4q68yQknNhg6DNPwTw+Qau+vsq+aVqS4ARKD6iMnqCfnleutmmk2zJe
+      FdabSSW/vzdkwEyH2rOlMLPgUuTnL6XPPPjw8OOTmDaJrENJ2O2kw7O1SHBQXEFN
+      NDCCTExxG/He5ZZe/kS0iT3dj0OsZ5X4bC+NlHNpAgMBAAGjUDBOMB0GA1UdDgQW
+      BBT2DxA6pVcdKBsD9aNDQnmqgwB/HDAfBgNVHSMEGDAWgBT2DxA6pVcdKBsD9aND
+      QnmqgwB/HDAMBgNVHRMEBTADAQH/MA0GCSqGSIb3DQEBCwUAA4IBAQCBUKMKWKch
+      maD+Vmnzmib8Y33Pu3cvvxBvUBi6Z3iERYbyS+2UN0Os8t5Hi31RfD8+cZ2XP1mW
+      Qho9GkO9DtRsLHc7t7j1fJ+l2ULZxbCJgnBX5OOr26tvQTkIvHjUZO/tBzeruA4r
+      GEm7ir2fFkVe+Biah+Ruck9DqI1Y7u7HCRGk8IvDZV/3CO8eG4hBOP8oyt7qEdOF
+      jpclWTnVSaxzLY0k7an8YYJ5bTg2Jo7JnsHGt+YuyTLQcKaxaZqOd48Dwz4xJUrZ
+      mYz9lCjdDxehIvCMYRqGwiYA9FcAP4AjSdsRWzWqBNr9XPpBQo3bDoZQc6OyJ3o3
+      KfZowWA2jUTg
+      -----END CERTIFICATE-----
