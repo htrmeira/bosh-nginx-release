@@ -3,7 +3,7 @@ name: nginx
 director_uuid: 92685ef7-072d-44b0-9b44-dde72d375932
 
 releases:
-- name: nginx-dev
+- name: nginx
   version:  latest
 
 networks:
@@ -17,17 +17,6 @@ networks:
   - cloud_properties:
       net_id: 2adc8497-bdf9-4be7-9d43-399d22555640
       security_groups:
-      - default
-    dns:
-    - 200.129.69.166
-    - 200.129.69.136
-    gateway: 10.17.0.1
-    range: 10.17.0.0/24
-    reserved:
-    - 10.17.0.2 - 10.17.0.199
-    static:
-    - 10.17.0.200 - 10.17.0.205
-  type: manual
 
 resource_pools:
 - name: default
@@ -39,7 +28,7 @@ resource_pools:
     instance_type: s1.small
 
 compilation:
-  workers: 2
+  workers: 1
   network: default
   cloud_properties:
     instance_type: s1.small
@@ -58,5 +47,3 @@ jobs:
   resource_pool: default
   networks:
   - name: default
-    static_ips:
-    - 10.17.0.202
