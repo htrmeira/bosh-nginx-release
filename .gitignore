@@ -6,3 +6,6 @@ dev_releases/
 .blobs/
 .dev_builds/
 .final_builds/
+
+config/blobs.yml
+config/dev.yml
